@@ -1,13 +1,17 @@
 import { pgTable, uuid, varchar, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import * as z from "zod";
 import { genderEnum } from "./genderEnum";
 import { maritalStatusEnum } from "./maritalStatusEnum";
 import { employmentTypeEnum } from "./employmentTypeEnum";
 import { highestEduEnum } from "./highestEduEnum";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { companyUser } from "./companyUser";
 
 export const user = pgTable("user", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   email: varchar("email", { length: 255 }).notNull(),
   hashedPassword: varchar("hashedpassword").notNull(),
   username: varchar("username", { length: 6 }).notNull(),
@@ -57,3 +61,7 @@ export const user = pgTable("user", {
 export const userRelations = relations(user, ({ one, many }) => ({
   companyUser: many(companyUser),
 }));
+
+// export const userSchema = createInsertSchema(user);
+export const userSchema = createSelectSchema(user);
+export type UserSchema = z.infer<typeof userSchema>;
