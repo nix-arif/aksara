@@ -7,6 +7,7 @@ import { employmentTypeEnum } from "./employmentTypeEnum";
 import { highestEduEnum } from "./highestEduEnum";
 import { relations, sql } from "drizzle-orm";
 import { companyUser } from "./companyUser";
+import { roleEnum } from "./roleEnum";
 
 export const user = pgTable("user", {
   id: uuid("id")
@@ -16,6 +17,7 @@ export const user = pgTable("user", {
   hashedPassword: varchar("hashedpassword").notNull(),
   username: varchar("username", { length: 6 }).notNull(),
   fullname: varchar("fullname", { length: 255 }).notNull(),
+  role: roleEnum("role").default("notAssign").notNull(),
   gender: genderEnum("gender").notNull(),
   nric: varchar("nric", { length: 255 }),
   position: varchar("position", { length: 64 }).notNull(),

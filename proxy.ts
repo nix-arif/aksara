@@ -32,7 +32,9 @@ export function proxy(request: NextRequest) {
   });
 
   // 3. Authentication Check (MUST be replaced with your actual logic)
-  const isLoggedIn = request.cookies.has("session-token");
+  const isLoggedIn = request.cookies.has("session");
+
+  console.log(`isLoggedIn: ${isLoggedIn}`);
 
   // --- CORE LOGIC ---
 

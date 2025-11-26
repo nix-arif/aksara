@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { genSalt, hash } from "bcrypt-ts";
 
 export async function POST(req: NextRequest) {
-  const { email, password } = await req.json();
+  const { username, email, password } = await req.json();
 
   const existing = await db.query.admin.findFirst({
     where: (fields, { eq }) => eq(fields.email, email),
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     .insert(admin)
     .values({
       email,
+      username,
       hashedPassword,
     })
     .returning();

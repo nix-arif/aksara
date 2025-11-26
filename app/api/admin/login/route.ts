@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { NextRequest, NextResponse } from "next/server";
 import { compare } from "bcrypt-ts";
+import { createSession } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
@@ -24,6 +25,10 @@ export async function POST(req: NextRequest) {
     );
 
   const { hashedPassword: _pw, ...safeAdmin } = result;
+
+  console.log(safeAdmin);
+
+  await createSession(safeAdmin.id, safeAdmin.username, safeAdmin.role);
 
   return NextResponse.json(safeAdmin, { status: 200 });
 }

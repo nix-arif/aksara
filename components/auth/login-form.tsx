@@ -16,12 +16,16 @@ import { LoginSchema } from "@/shemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { loginAdmin } from "@/redux/admin/adminSlice";
+import { FormSuccess } from "../form-success";
 
 const LoginForm = () => {
+  const dispatch = useAppDispatch();
+  const admin = useAppSelector((state) => state.admin);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -31,9 +35,17 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = () => {
-    console.log("from login");
+  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
+    setSuccess("");
+    try {
+      await dispatch(
+        loginAdmin({ email: values.email, password: values.password })
+      ).unwrap();
+      setSuccess("Login successful");
+    } catch (error: any) {
+      setError(error.message);
+    }
   };
   return (
     <CardWrapper
@@ -77,6 +89,7 @@ const LoginForm = () => {
               )}
             />
           </div>
+          <FormSuccess message={success} />
           <FormError message={error} />
           <Button type="submit" className="bg-[#0088de] w-full">
             LOGIN
