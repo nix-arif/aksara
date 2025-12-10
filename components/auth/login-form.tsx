@@ -24,6 +24,7 @@ import { useSearchParams } from "next/navigation";
 const LoginForm = () => {
   const searchParams = useSearchParams();
   const message = searchParams.get("message"); // ✅ ambil query param
+  if (!message) return null;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
