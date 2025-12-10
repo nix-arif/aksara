@@ -16,16 +16,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAppDispatch } from "@/redux/hooks";
+import { registerAdmin } from "@/redux/admin/adminSlice";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import { useRouter } from "next/navigation";
 
 const RegisterForm = () => {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const router = useRouter();
-
+  const dispatch = useAppDispatch();
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -39,31 +38,17 @@ const RegisterForm = () => {
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     setError("");
     setSuccess("");
-    setLoading(true);
     try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      await dispatch(
+        registerAdmin({
           email: values.email,
           username: values.username,
           password: values.password,
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data?.error || "Something went wrong");
-
-      // ✅ redirect ke login dengan query param
-      router.push(
-        `/auth/login?message=${encodeURIComponent(
-          "Registration successful, you may login now"
-        )}`
-      );
+        })
+      ).unwrap();
+      setSuccess("Registration successful");
     } catch (error: any) {
       setError(error.message);
-    } finally {
-      setLoading(false);
     }
   };
   return (
@@ -134,12 +119,8 @@ const RegisterForm = () => {
           </div>
           <FormSuccess message={success} />
           <FormError message={error} />
-          <Button
-            type="submit"
-            className="bg-[#0088de] w-full"
-            disabled={loading}
-          >
-            {loading ? "Registering in process" : "REGISTER"}
+          <Button type="submit" className="bg-[#0088de] w-full">
+            REGISTER
           </Button>
         </form>
       </Form>

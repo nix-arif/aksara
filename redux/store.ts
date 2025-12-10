@@ -4,7 +4,6 @@ import companyReducer from "@/redux/company/companySlice";
 
 const store = configureStore({
   reducer: {
-    admin: adminReducer,
     company: companyReducer,
   },
 });

@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
 // The function is now named 'proxy'
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  console.log(pathname);
 
   // Function to check if the current path matches any public path (using regex)
   const isPublicPath = PUBLIC_PATHS.some((pathPattern) => {

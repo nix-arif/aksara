@@ -12,20 +12,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form-error";
-import { LoginSchema } from "@/shemas";
+import { LoginSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { loginAdmin } from "@/redux/admin/adminSlice";
 import { FormSuccess } from "../form-success";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const LoginForm = () => {
-  const dispatch = useAppDispatch();
-  const admin = useAppSelector((state) => state.admin);
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message"); // ✅ ambil query param
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -38,11 +40,21 @@ const LoginForm = () => {
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
+    setLoading(true);
     try {
-      await dispatch(
-        loginAdmin({ email: values.email, password: values.password })
-      ).unwrap();
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Something went wrong");
       setSuccess("Login successful");
+
+      router.push("/dashboard");
     } catch (error: any) {
       setError(error.message);
     }
@@ -55,6 +67,11 @@ const LoginForm = () => {
       showSocial={false}
     >
       <Form {...form}>
+        {message && (
+          <div className="text-white mb-4 text-sm bg-green-500 text-center rounded-sm">
+            {message}
+          </div>
+        )}
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-0.5 my-4">
             <FormField
@@ -91,8 +108,12 @@ const LoginForm = () => {
           </div>
           <FormSuccess message={success} />
           <FormError message={error} />
-          <Button type="submit" className="bg-[#0088de] w-full">
-            LOGIN
+          <Button
+            type="submit"
+            className="bg-[#0088de] w-full"
+            disabled={loading}
+          >
+            {loading ? "Login in process" : "LOGIN"}
           </Button>
         </form>
       </Form>
