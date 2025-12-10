@@ -16,19 +16,29 @@ import { LoginSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormSuccess } from "../form-success";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 
 const LoginForm = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const message = searchParams.get("message"); // ✅ ambil query param
-  if (!message) return null;
+  const [queryMessage, setQueryMessage] = useState<string | null>(null);
+
+  // Ambil message dari query param hanya sekali
+  useEffect(() => {
+    const msg = searchParams.get("message");
+    if (msg) {
+      setQueryMessage(msg);
+      // optionally remove query param from URL
+      router.replace("/auth/login", { scroll: false });
+    }
+  }, [searchParams, router]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -68,9 +78,9 @@ const LoginForm = () => {
       showSocial={false}
     >
       <Form {...form}>
-        {message && (
+        {queryMessage && (
           <div className="text-white mb-4 text-sm bg-green-500 text-center rounded-sm">
-            {message}
+            {queryMessage}
           </div>
         )}
         <form onSubmit={form.handleSubmit(onSubmit)}>
