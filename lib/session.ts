@@ -27,8 +27,9 @@ export async function decrypt(
       typeof payload.userId === "string" &&
       typeof payload.username === "string" &&
       typeof payload.role === "string" &&
-      typeof payload.positionId === "string" &&
-      typeof payload.departmentId === "string" &&
+      (typeof payload.positionId === "string" || payload.positionId === null) &&
+      (typeof payload.departmentId === "string" ||
+        payload.departmentId === null) &&
       typeof payload.expiresAt === "string"
     ) {
       return {
@@ -83,6 +84,7 @@ export async function deleteSession() {
 // Helper untuk ambil session dari request
 export async function getSession(): Promise<SessionPayload | undefined> {
   const cookieStore = await cookies();
+  console.log("cookies:", cookieStore.getAll());
   const session = cookieStore.get("session")?.value;
   if (!session) return undefined;
   return decrypt(session);
