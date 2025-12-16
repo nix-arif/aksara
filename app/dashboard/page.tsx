@@ -1,9 +1,17 @@
-import { getSession } from "@/lib/session";
+import ModalDialog from "@/components/modal-dialog/modal-dialog";
+import { getSession } from "@/lib/auth";
 
 const DashboardPage = async () => {
   const session = await getSession();
-  console.log(session);
-  return <div>From Dashboard - {JSON.stringify(session)}</div>;
+
+  return (
+    <div>
+      <div>From Dashboard - {JSON.stringify(session)}</div>
+      <div>
+        <ModalDialog />
+      </div>
+    </div>
+  );
 };
 
 export default DashboardPage;

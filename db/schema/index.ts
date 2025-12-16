@@ -1,2 +1,9 @@
-export { user } from "@/db/schema/user";
-export { userCompany } from "@/db/schema/userCompany";
+export { users } from "@/db/schema/users";
+export { departments } from "@/db/schema/departments";
+export { permissions } from "@/db/schema/permissions";
+export { positions } from "@/db/schema/positions";
+export { rolePermissions } from "@/db/schema/rolePermissions";
+export { roles } from "@/db/schema/roles";
+export { sessions } from "@/db/schema/sessions";
+export { userCompanyAssignments } from "@/db/schema/userCompanyAssignments";
+export { companies } from "@/db/schema/companies";

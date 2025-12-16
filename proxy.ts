@@ -1,21 +1,22 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { verifyToken } from "./lib/auth";
 
 // 1. Define the PUBLIC/ALLOWED paths
 // Add all paths a user can access without being logged in.
-const PUBLIC_PATHS = [
+const PUBLIC_PATHS = ["/"];
+
+const AUTH_PATHS = [
   "/auth",
   "/signup",
   "/forgot-password",
   "/public-page",
   "/api/public/.*", // Example: any API route under /api/public/ is public
-  "/",
 ];
 
 // The function is now named 'proxy'
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  console.log(pathname);
 
   // Function to check if the current path matches any public path (using regex)
   const isPublicPath = PUBLIC_PATHS.some((pathPattern) => {
@@ -32,19 +33,50 @@ export function proxy(request: NextRequest) {
     return pathname === pathPattern || pathname.startsWith(`${pathPattern}/`);
   });
 
-  // 3. Authentication Check (MUST be replaced with your actual logic)
-  const isLoggedIn = request.cookies.has("session");
+  // Function to check if the current path matches any public path (using regex)
+  const isAuthPath = AUTH_PATHS.some((pathPattern) => {
+    // For simple string paths, check startsWith
+    if (pathPattern.includes("*")) {
+      // Simple wildcards ('*') are not natively supported by startsWith.
+      // For production, you'd use a more robust regex library or the matcher in config.
+      // For this example, we'll keep the logic simple for string matching:
+      return (
+        pathname === pathPattern ||
+        pathname.startsWith(pathPattern.replace("*", ""))
+      );
+    }
+    return pathname === pathPattern || pathname.startsWith(`${pathPattern}/`);
+  });
 
-  console.log(`isLoggedIn: ${isLoggedIn}`);
+  // console.log("isPublicPath:", isPublicPath);
+  // console.log("isAuthPath:", isAuthPath);
+
+  // 3. Authentication Check (MUST be replaced with your actual logic)
+  const isLoggedIn = request.cookies.has(process.env.JWT_NAME!);
+  // const authToken = request.cookies.get(process.env.JWT_NAME!)?.value;
+
+  // console.log("isLoggedIn:", isLoggedIn);
+  // console.log("authToken:", authToken);
+
+  // const authToken2 = await getSession();
+  // console.log(authToken2);
 
   // --- CORE LOGIC ---
-
-  // A. Logged in and trying to access a public/auth path: Redirect to dashboard.
-  if (isLoggedIn && isPublicPath) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // A. Do not block all Public Path
+  if (isPublicPath) {
+    return NextResponse.next();
   }
 
-  // B. NOT Logged in and trying to access a PRIVATE path: Redirect to login.
+  // B. Logged in and trying to access a public/auth path: Redirect to dashboard.
+  if (isLoggedIn && isAuthPath) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (!isLoggedIn && isAuthPath) {
+    return NextResponse.next();
+  }
+
+  // C. NOT Logged in and trying to access a PRIVATE path: Redirect to login.
   if (!isLoggedIn && !isPublicPath) {
     const loginUrl = new URL("/auth/login", request.url);
     // Pass the original URL so the user can be redirected back after login
@@ -52,7 +84,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // C. Otherwise, allow the request to proceed.
+  // E. Otherwise, allow the request to proceed.
   return NextResponse.next();
 }
 

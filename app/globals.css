@@ -41,6 +41,21 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --text-theme-sm: 14px;
+
+  --color-brand-25: #f6fbf6; /* background very light */
+  --color-brand-50: #f0faf0; /* Lighter background / cards */
+  --color-brand-100: #e4f0e4; /* Light buttons / backgrounds */
+  --color-brand-200: #cce1cc; /* Buttons / highlights */
+  --color-brand-300: #b4cfb4; /* Light hover / accents */
+  --color-brand-400: #9cc29c; /* Secondary buttons / highlights */
+  --color-brand-500: #3c9e41; /*Primary brand color */
+  --color-brand-600: #2f8533; /* Dark hover / borders */
+  --color-brand-700: #28692b; /* Text / dark panels */
+  --color-brand-800: #225623; /* Footer / shadows / overlays */
+  --color-brand-900: #173b17; /* Very dark – text / overlays */
+  --color-brand-950: #0d200f; /* Extreme dark – accent / high contrast */
 }
 
 :root {
@@ -158,4 +173,65 @@
 }
 .contant_box_404 {
   margin-top: -50px;
+}
+
+/* Utility */
+
+@utility menu-item {
+  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+}
+
+@utility menu-item-active {
+  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/12 dark:text-brand-400;
+}
+
+@utility menu-item-inactive {
+  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+}
+
+@utility menu-item-icon {
+  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400;
+}
+
+@utility menu-item-icon-active {
+  @apply text-brand-500 dark:text-brand-400;
+}
+
+@utility menu-item-icon-inactive {
+  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+}
+
+/* Missing menu-item-arrow */
+
+@utility menu-dropdown-item {
+  @apply relative flex items-center gap-3 rounded-lg px-3 dark:text-gray-400 dark:group-hover:text-gray-300 text-sm font-medium text-nowrap;
+}
+
+@utility menu-dropdown-item-active {
+  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/12 dark:text-brand-400;
+}
+
+@utility menu-dropdown-item-inactive {
+  @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5;
+}
+
+@utility menu-dropdown-badge {
+  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-brand-500 dark:text-brand-400;
+}
+
+@utility menu-dropdown-badge-active {
+  @apply bg-brand-100 dark:bg-brand-500/20;
+}
+
+@utility menu-dropdown-badge-inactive {
+  @apply bg-brand-50 group-hover:bg-brand-100 dark:bg-brand-500/15 dark:group-hover:bg-brand-500/20;
+}
+
+@utility no-scrollbar {
+  /* Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

@@ -18,7 +18,10 @@ const sidebarSlice = createSlice({
     toggleMobileSidebar: (state) => {
       state.isMobileOpen = !state.isMobileOpen;
     },
-    setHovered: (state, action) => {
+    closeMobileSidebar: (state) => {
+      state.isMobileOpen = false;
+    },
+    setIsHovered: (state, action) => {
       state.isHovered = action.payload;
     },
     setActiveItem: (state, action) => {
@@ -34,7 +37,8 @@ const sidebarSlice = createSlice({
 export const {
   toggleSidebar,
   toggleMobileSidebar,
-  setHovered,
+  closeMobileSidebar,
+  setIsHovered,
   setActiveItem,
   toggleSubmenu,
 } = sidebarSlice.actions;

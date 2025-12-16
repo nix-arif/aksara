@@ -84,7 +84,6 @@ export async function deleteSession() {
 // Helper untuk ambil session dari request
 export async function getSession(): Promise<SessionPayload | undefined> {
   const cookieStore = await cookies();
-  console.log("cookies:", cookieStore.getAll());
   const session = cookieStore.get("session")?.value;
   if (!session) return undefined;
   return decrypt(session);

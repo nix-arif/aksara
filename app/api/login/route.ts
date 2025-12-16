@@ -1,31 +1,23 @@
 import { db } from "@/db";
 import { NextRequest, NextResponse } from "next/server";
 import { compare } from "bcrypt-ts";
-import { createSession } from "@/lib/session";
-import { user, userCompany } from "@/db/schema";
+import { AuthPayload, createSession } from "@/lib/auth";
+import { sessions, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
 
-  try {
-    // 1. Query user + relation
-    const result = await db
-      .select({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        positionId: userCompany.position_id,
-        departmentId: userCompany.department_id,
-        password_hash: user.password_hash,
-      })
-      .from(user)
-      .leftJoin(userCompany, eq(user.id, userCompany.user_id))
-      .where(eq(user.email, email))
-      .execute();
+  if (!email || !password)
+    return NextResponse.json(
+      { message: "Invalid credential" },
+      { status: 400 }
+    );
 
-    const userData = result[0];
+  try {
+    const userData = await db.query.users.findFirst({
+      where: eq(users.email, email.toLowerCase()),
+    });
 
     if (!userData)
       return NextResponse.json(
@@ -33,7 +25,7 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
 
-    const isPasswordMatched = await compare(password, userData.password_hash);
+    const isPasswordMatched = await compare(password, userData.hashedPassword);
 
     if (!isPasswordMatched)
       return NextResponse.json(
@@ -41,17 +33,18 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
 
-    const { password_hash: _pw, ...safeUser } = userData;
+    const { hashedPassword: _pw, ...safeUser } = userData;
 
-    await createSession(
-      safeUser.id,
-      safeUser.username,
-      safeUser.role,
-      safeUser.positionId,
-      safeUser.departmentId
-    );
+    const sessionPayload: AuthPayload = {
+      userId: userData.id,
+      email: userData.email,
+      username: userData.username,
+      isSuperAdmin: userData.isSuperAdmin || false,
+    };
 
-    return NextResponse.json(safeUser, { status: 200 });
+    await createSession(sessionPayload);
+
+    return NextResponse.json(sessionPayload, { status: 200 });
   } catch (err) {
     console.log(err);
     return NextResponse.json(
